@@ -1,4 +1,5 @@
 import 'package:attractions_app/model/AttractionModel.dart';
+import 'package:attractions_app/widgets/content_dialog.dart';
 import 'package:attractions_app/widgets/content_form_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -65,8 +66,8 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                         );
                       }
                     },
-                    child: SizedBox(
-                      height: 50,
+                    child: InkWell(
+                      onTap: () => _showContent(attraction),
                       child: ListTile(
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,6 +89,26 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                 },
               ),
             ),
+    );
+  }
+
+  void _showContent(AttractionModel currentAttraction) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Attraction ${currentAttraction.id}'),
+          content: ContentDialog(currentAttraction: currentAttraction),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            )
+          ],
+        );
+      },
     );
   }
 
