@@ -1,6 +1,8 @@
 import 'package:attractions_app/model/AttractionModel.dart';
 import 'package:attractions_app/widgets/content_dialog.dart';
 import 'package:attractions_app/widgets/content_form_dialog.dart';
+import 'package:attractions_app/widgets/slide_left_background.dart';
+import 'package:attractions_app/widgets/slide_right_background.dart';
 import 'package:flutter/material.dart';
 
 class ListAttractionsPage extends StatefulWidget {
@@ -11,14 +13,21 @@ class ListAttractionsPage extends StatefulWidget {
 }
 
 class _ListAttractionsPageState extends State<ListAttractionsPage> {
-  final List<AttractionModel> attractionsList = [];
+  static const ORDER_BY_ID = 'ORDER_BY_ID';
+  static const ORDER_BY_NAME = 'ORDER_BY_NAME';
+  static const ORDER_BY_DATE = 'ORDER_BY_DATE';
 
-  final List<AttractionModel> attractionsListGenerate =
-      List<AttractionModel>.generate(
+  bool _orderByIDAsc = true;
+  bool _orderByNameAsc = false;
+  bool _orderByDateAsc = false;
+
+  // final List<AttractionModel> attractionsList = [];
+
+  final List<AttractionModel> attractionsList = List<AttractionModel>.generate(
     5,
     (int index) => AttractionModel(
       id: index + 1,
-      title: 'title',
+      title: 'title$index',
       description: 'description',
       differential: 'differential',
       date: DateTime.now(),
@@ -32,6 +41,24 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Attractions'),
+        actions: [
+          PopupMenuButton<String>(
+            child: const Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.filter_list_rounded),
+            ),
+            itemBuilder: (BuildContext context) => _filterItensPopMenu(),
+            onSelected: (String selectedValue) {
+              if (selectedValue == ORDER_BY_ID) {
+                _orderListById();
+              } else if (selectedValue == ORDER_BY_NAME) {
+                _orderListByName();
+              } else {
+                _orderListByDate();
+              }
+            },
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openForm(),
@@ -90,6 +117,50 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
               ),
             ),
     );
+  }
+
+  List<PopupMenuEntry<String>> _filterItensPopMenu() {
+    return [
+      PopupMenuItem<String>(
+        value: ORDER_BY_ID,
+        child: Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                !_orderByIDAsc ? 'Order by ID ASC' : 'Order by ID DESC',
+              ),
+            )
+          ],
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: ORDER_BY_NAME,
+        child: Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                !_orderByNameAsc ? 'Order by NAME ASC' : 'Order by NAME DESC',
+              ),
+            )
+          ],
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: ORDER_BY_DATE,
+        child: Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                !_orderByDateAsc ? 'Order by DATE ASC' : 'Order by DATE DESC',
+              ),
+            )
+          ],
+        ),
+      ),
+    ];
   }
 
   void _showContent(AttractionModel currentAttraction) {
@@ -154,61 +225,44 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
     );
   }
 
-  Widget slideRightBackground() {
-    return Container(
-      color: Colors.green,
-      child: Align(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 20,
-            ),
-            Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
-            Text(
-              " Edit",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ],
-        ),
-        alignment: Alignment.centerLeft,
-      ),
-    );
+  void _orderListById() {
+    setState(() {
+      if (_orderByIDAsc) {
+        attractionsList.sort((a, b) => b.id.compareTo(a.id));
+      } else {
+        attractionsList.sort((a, b) => a.id.compareTo(b.id));
+      }
+      _orderByIDAsc = !_orderByIDAsc;
+    });
   }
 
-  Widget slideLeftBackground() {
-    return Container(
-      color: Colors.red,
-      child: Align(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-            Text(
-              " Delete",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.right,
-            ),
-            SizedBox(
-              width: 20,
-            ),
-          ],
-        ),
-        alignment: Alignment.centerRight,
-      ),
-    );
+  void _orderListByName() {
+    setState(() {
+      if (_orderByNameAsc) {
+        attractionsList.sort((a, b) => b.title.compareTo(a.title));
+      } else {
+        attractionsList.sort((a, b) => a.title.compareTo(b.title));
+      }
+      _orderByNameAsc = !_orderByNameAsc;
+    });
+  }
+
+  void _orderListByDate() {
+    setState(() {
+      if (_orderByDateAsc) {
+        attractionsList.sort(
+          (a, b) => DateTime.parse(b.date.toString()).compareTo(
+            DateTime.parse(a.date.toString()),
+          ),
+        );
+      } else {
+        attractionsList.sort(
+          (a, b) => DateTime.parse(a.date.toString()).compareTo(
+            DateTime.parse(b.date.toString()),
+          ),
+        );
+      }
+      _orderByDateAsc = !_orderByDateAsc;
+    });
   }
 }
