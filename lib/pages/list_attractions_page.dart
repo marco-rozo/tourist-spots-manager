@@ -131,6 +131,7 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                               if (direction == DismissDirection.endToStart) {
                                 setState(() {
                                   allAttractionsList.removeAt(index);
+                                  foundAttractionsList = allAttractionsList;
                                 });
                               } else {
                                 _openForm(
