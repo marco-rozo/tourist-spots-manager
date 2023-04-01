@@ -117,6 +117,7 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                     ? const Center(
                         child: Text('No tourist attractions registered :('))
                     : ListView.separated(
+                        key: UniqueKey(),
                         separatorBuilder: (BuildContext context, int index) =>
                             const Divider(),
                         itemCount: foundAttractionsList.length,
@@ -125,14 +126,15 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                           return Dismissible(
                             background: slideRightBackground(),
                             secondaryBackground: slideLeftBackground(),
-                            key: ValueKey<AttractionModel>(
-                                foundAttractionsList[index]),
+                            key: UniqueKey(),
                             onDismissed: (DismissDirection direction) {
                               if (direction == DismissDirection.endToStart) {
-                                setState(() {
-                                  allAttractionsList.removeAt(index);
-                                  foundAttractionsList = allAttractionsList;
-                                });
+                                _delete(attraction, index);
+                                // setState(() {
+                                // allAttractionsList.removeAt(index);
+                                // allAttractionsList.remove(attraction);
+                                // foundAttractionsList = allAttractionsList;
+                                // });
                               } else {
                                 _openForm(
                                   currentAttraction: attraction,
@@ -274,6 +276,51 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
       builder: (BuildContext context) {
         return CustomBottomModal(
           attraction: attraction,
+        );
+      },
+    );
+  }
+
+  void _delete(AttractionModel attraction, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              Icon(
+                Icons.warning,
+                color: Colors.red,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+                child: Text('Caution!'),
+              ),
+            ],
+          ),
+          content: Text('This record will be permanently deleted'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  allAttractionsList[index] = attraction;
+                });
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  allAttractionsList.remove(attraction);
+                  // allAttractionsList.removeAt(index);
+                  foundAttractionsList = allAttractionsList;
+                });
+              },
+              child: Text('Confirm'),
+            )
+          ],
         );
       },
     );
