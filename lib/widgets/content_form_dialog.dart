@@ -24,6 +24,8 @@ class ContentFormDialogState extends State<ContentFormDialog> {
   @override
   void initState() {
     super.initState();
+    dateTEControler.text = _dateFormat.format(DateTime.now());
+
     if (widget.currentAttraction != null) {
       descriptionTEController.text = widget.currentAttraction!.description;
       titleTEController.text = widget.currentAttraction!.title;
@@ -62,7 +64,7 @@ class ContentFormDialogState extends State<ContentFormDialog> {
           ),
           TextFormField(
             controller: differentialTEController,
-            decoration: InputDecoration(labelText: 'differential'),
+            decoration: InputDecoration(labelText: 'Differential'),
           ),
           TextFormField(
             controller: dateTEControler,
