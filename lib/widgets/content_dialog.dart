@@ -1,4 +1,4 @@
-import 'package:attractions_app/model/AttractionModel.dart';
+import 'package:attractions_app/model/attraction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';

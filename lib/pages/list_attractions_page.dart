@@ -1,4 +1,5 @@
-import 'package:attractions_app/model/AttractionModel.dart';
+import 'package:attractions_app/dao/attraction_dao.dart';
+import 'package:attractions_app/model/attraction_model.dart';
 import 'package:attractions_app/widgets/content_dialog.dart';
 import 'package:attractions_app/widgets/content_form_dialog.dart';
 import 'package:attractions_app/widgets/custom_bottom_modal.dart';
@@ -22,29 +23,33 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
   bool _orderByIDAsc = true;
   bool _orderByNameAsc = false;
   bool _orderByDateAsc = false;
+  bool _isLoading = false;
 
-  final List<AttractionModel> allAttractionsList =
-      List<AttractionModel>.generate(
-    5,
-    (int index) => AttractionModel(
-      id: index + 1,
-      title: 'title$index',
-      description: 'description',
-      differential: 'differential',
-      date: DateTime.now(),
-    ),
-  );
+  final List<AttractionModel> allAttractionsList = [];
+  // final List<AttractionModel> allAttractionsList =
+  //     List<AttractionModel>.generate(
+  //   5,
+  //   (int index) => AttractionModel(
+  //     id: index + 1,
+  //     title: 'title$index',
+  //     description: 'description',
+  //     differential: 'differential',
+  //     date: DateTime.now(),
+  //   ),
+  // );
 
   List<AttractionModel> foundAttractionsList = [];
   final _inputController = TextEditingController();
+  final _dao = AttractionDao();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _updateList();
+
     setState(() {
       _inputController.text = '';
-      foundAttractionsList = allAttractionsList;
     });
   }
 
@@ -109,50 +114,76 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                   _filterList(value),
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Expanded(
-                child: foundAttractionsList.isEmpty
-                    ? const Center(
-                        child: Text('No tourist attractions registered :('))
-                    : ListView.separated(
-                        key: UniqueKey(),
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const Divider(),
-                        itemCount: foundAttractionsList.length,
-                        itemBuilder: (context, index) {
-                          final attraction = foundAttractionsList[index];
-                          return Dismissible(
-                            background: slideRightBackground(),
-                            secondaryBackground: slideLeftBackground(),
-                            key: UniqueKey(),
-                            onDismissed: (DismissDirection direction) {
-                              if (direction == DismissDirection.endToStart) {
-                                _delete(attraction, index);
-                                // setState(() {
-                                // allAttractionsList.removeAt(index);
-                                // allAttractionsList.remove(attraction);
-                                // foundAttractionsList = allAttractionsList;
-                                // });
-                              } else {
-                                _openForm(
-                                  currentAttraction: attraction,
-                                  currentIndex: index,
-                                );
-                              }
-                            },
-                            child: InkWell(
-                              onTap: () => showBottomFilter(attraction),
-                              child: CustomListTile(
-                                title: attraction.title,
-                                date: attraction.dateFormatted,
-                                subtitle: attraction.description,
+                child: _isLoading
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Align(
+                            alignment: AlignmentDirectional.center,
+                            child: CircularProgressIndicator(),
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional.center,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Loading list...',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                ),
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        ],
+                      )
+                    : foundAttractionsList.isEmpty
+                        ? const Center(
+                            child: Text('No tourist attractions registered :('))
+                        : ListView.separated(
+                            key: UniqueKey(),
+                            separatorBuilder:
+                                (BuildContext context, int index) =>
+                                    const Divider(),
+                            itemCount: foundAttractionsList.length,
+                            itemBuilder: (context, index) {
+                              final attraction = foundAttractionsList[index];
+                              return Dismissible(
+                                background: slideRightBackground(),
+                                secondaryBackground: slideLeftBackground(),
+                                key: UniqueKey(),
+                                onDismissed: (DismissDirection direction) {
+                                  if (direction ==
+                                      DismissDirection.endToStart) {
+                                    _delete(attraction, index);
+                                    // setState(() {
+                                    // allAttractionsList.removeAt(index);
+                                    // allAttractionsList.remove(attraction);
+                                    // foundAttractionsList = allAttractionsList;
+                                    // });
+                                  } else {
+                                    _openForm(
+                                      currentAttraction: attraction,
+                                      currentIndex: index,
+                                    );
+                                  }
+                                },
+                                child: InkWell(
+                                  onTap: () => showBottomFilter(attraction),
+                                  child: CustomListTile(
+                                    title: attraction.title,
+                                    date: attraction.dateFormatted,
+                                    subtitle: attraction.description,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
               )
             ],
           )),
@@ -238,24 +269,37 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
               ContentFormDialog(key: key, currentAttraction: currentAttraction),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (currentIndex != null) {
+                  setState(() {
+                    allAttractionsList[currentIndex] = currentAttraction!;
+                  });
+                }
+              },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 if (key.currentState != null &&
                     key.currentState!.validatedData()) {
-                  setState(() {
-                    final newAttraction = key.currentState!.newAttraction;
-                    if (currentIndex == null) {
-                      newAttraction.id = (allAttractionsList.length + 1);
-                      allAttractionsList.add(newAttraction);
-                    } else {
-                      allAttractionsList[currentIndex] = newAttraction;
-                    }
-                    foundAttractionsList = allAttractionsList;
-                  });
                   Navigator.of(context).pop();
+                  final newAttraction = key.currentState!.newAttraction;
+                  _dao.salvar(newAttraction).then((success) {
+                    if (success) {
+                      _updateList();
+                    }
+                  });
+                  _updateList();
+                  // setState(() {
+                  //   if (currentIndex == null) {
+                  //     newAttraction.id = (allAttractionsList.length + 1);
+                  //     allAttractionsList.add(newAttraction);
+                  //   } else {
+                  //     allAttractionsList[currentIndex] = newAttraction;
+                  //   }
+                  //   foundAttractionsList = allAttractionsList;
+                  // });
                 }
               },
               child: Text('Save'),
@@ -264,6 +308,27 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
         );
       },
     );
+  }
+
+  void _updateList() async {
+    setState(() {
+      _isLoading = false;
+    });
+    final attractions = await _dao.listar(
+      filter: '',
+      fieldOrder: AttractionModel.FIELD_ID,
+      isDescOrder: false,
+    );
+    setState(() {
+      allAttractionsList.clear();
+      foundAttractionsList.clear();
+      if (attractions.isNotEmpty) {
+        allAttractionsList.addAll(attractions);
+        foundAttractionsList.addAll(attractions);
+      }
+
+      _isLoading = false;
+    });
   }
 
   Future<void> showBottomFilter(AttractionModel attraction) async {
@@ -312,11 +377,18 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                setState(() {
-                  allAttractionsList.remove(attraction);
-                  // allAttractionsList.removeAt(index);
-                  foundAttractionsList = allAttractionsList;
+                if (attraction.id == null) {
+                  return;
+                }
+                _dao.remover(attraction.id!).then((success) {
+                  if (success) _updateList();
                 });
+
+                // setState(() {
+                //   allAttractionsList.remove(attraction);
+                //   // allAttractionsList.removeAt(index);
+                //   foundAttractionsList = allAttractionsList;
+                // });
               },
               child: Text('Confirm'),
             )
@@ -329,9 +401,9 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
   void _orderListById() {
     setState(() {
       if (_orderByIDAsc) {
-        allAttractionsList.sort((a, b) => b.id.compareTo(a.id));
+        allAttractionsList.sort((a, b) => b.id!.compareTo(a.id!));
       } else {
-        allAttractionsList.sort((a, b) => a.id.compareTo(b.id));
+        allAttractionsList.sort((a, b) => a.id!.compareTo(b.id!));
       }
       _orderByIDAsc = !_orderByIDAsc;
       foundAttractionsList = allAttractionsList;

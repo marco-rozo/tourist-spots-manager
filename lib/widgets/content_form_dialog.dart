@@ -1,4 +1,4 @@
-import 'package:attractions_app/model/AttractionModel.dart';
+import 'package:attractions_app/model/attraction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -66,21 +66,21 @@ class ContentFormDialogState extends State<ContentFormDialog> {
             controller: differentialTEController,
             decoration: InputDecoration(labelText: 'Differential'),
           ),
-          TextFormField(
-            controller: dateTEControler,
-            decoration: InputDecoration(
-              labelText: 'Date',
-              prefixIcon: IconButton(
-                onPressed: _showCalendario,
-                icon: const Icon(Icons.calendar_today),
-              ),
-              suffixIcon: IconButton(
-                onPressed: () => dateTEControler.clear(),
-                icon: const Icon(Icons.close),
-              ),
-            ),
-            readOnly: true,
-          )
+          // TextFormField(
+          //   controller: dateTEControler,
+          //   decoration: InputDecoration(
+          //     labelText: 'Date',
+          //     prefixIcon: IconButton(
+          //       onPressed: _showCalendario,
+          //       icon: const Icon(Icons.calendar_today),
+          //     ),
+          //     suffixIcon: IconButton(
+          //       onPressed: () => dateTEControler.clear(),
+          //       icon: const Icon(Icons.close),
+          //     ),
+          //   ),
+          //   readOnly: true,
+          // )
         ],
       ),
     );
@@ -110,12 +110,10 @@ class ContentFormDialogState extends State<ContentFormDialog> {
   bool validatedData() => formKey.currentState!.validate() == true;
 
   AttractionModel get newAttraction => AttractionModel(
-        id: widget.currentAttraction?.id ?? 0,
+        id: widget.currentAttraction?.id,
         title: titleTEController.text,
         description: descriptionTEController.text,
         differential: differentialTEController.text,
-        date: dateTEControler.text.isEmpty
-            ? DateTime.now()
-            : _dateFormat.parse(dateTEControler.text),
+        date: DateTime.now(),
       );
 }
