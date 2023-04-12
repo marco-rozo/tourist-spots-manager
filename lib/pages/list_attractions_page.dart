@@ -85,108 +85,107 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
         child: const Icon(Icons.add),
       ),
       body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-          child: Column(
-            children: [
-              TextField(
-                autofocus: false,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        child: Column(
+          children: [
+            TextField(
+              autofocus: false,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
                   ),
-                  suffixIcon: _inputController.text != ''
-                      ? IconButton(
-                          onPressed: () => {
-                            _inputController.text = '',
-                            _filterList(_inputController.text)
-                          },
-                          icon: Icon(Icons.close),
-                        )
-                      : Icon(Icons.search),
-
-                  // icon: Icon(Icons.person),
-                  hintText: 'Pesquisar',
                 ),
-                controller: _inputController,
-                onChanged: (value) => {
-                  _filterList(value),
-                },
+                suffixIcon: _inputController.text != ''
+                    ? IconButton(
+                        onPressed: () => {
+                          _inputController.text = '',
+                          _filterList(_inputController.text)
+                        },
+                        icon: Icon(Icons.close),
+                      )
+                    : Icon(Icons.search),
+
+                // icon: Icon(Icons.person),
+                hintText: 'Pesquisar',
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: _isLoading
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Align(
-                            alignment: AlignmentDirectional.center,
-                            child: CircularProgressIndicator(),
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional.center,
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 10),
-                              child: Text(
-                                'Loading list...',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+              controller: _inputController,
+              onChanged: (value) => {
+                _filterList(value),
+              },
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: _isLoading
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Align(
+                          alignment: AlignmentDirectional.center,
+                          child: CircularProgressIndicator(),
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.center,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 10),
+                            child: Text(
+                              'Loading list...',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
-                          )
-                        ],
-                      )
-                    : foundAttractionsList.isEmpty
-                        ? const Center(
-                            child: Text('No tourist attractions registered :('))
-                        : ListView.separated(
-                            key: UniqueKey(),
-                            separatorBuilder:
-                                (BuildContext context, int index) =>
-                                    const Divider(),
-                            itemCount: foundAttractionsList.length,
-                            itemBuilder: (context, index) {
-                              final attraction = foundAttractionsList[index];
-                              return Dismissible(
-                                background: slideRightBackground(),
-                                secondaryBackground: slideLeftBackground(),
-                                key: UniqueKey(),
-                                onDismissed: (DismissDirection direction) {
-                                  if (direction ==
-                                      DismissDirection.endToStart) {
-                                    _delete(attraction, index);
-                                    // setState(() {
-                                    // allAttractionsList.removeAt(index);
-                                    // allAttractionsList.remove(attraction);
-                                    // foundAttractionsList = allAttractionsList;
-                                    // });
-                                  } else {
-                                    _openForm(
-                                      currentAttraction: attraction,
-                                      currentIndex: index,
-                                    );
-                                  }
-                                },
-                                child: InkWell(
-                                  onTap: () => showBottomFilter(attraction),
-                                  child: CustomListTile(
-                                    title: attraction.title,
-                                    date: attraction.dateFormatted,
-                                    subtitle: attraction.description,
-                                  ),
-                                ),
-                              );
-                            },
                           ),
-              )
-            ],
-          )),
+                        )
+                      ],
+                    )
+                  : foundAttractionsList.isEmpty
+                      ? const Center(
+                          child: Text('No tourist attractions registered :('))
+                      : ListView.separated(
+                          key: UniqueKey(),
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const Divider(),
+                          itemCount: foundAttractionsList.length,
+                          itemBuilder: (context, index) {
+                            final attraction = foundAttractionsList[index];
+                            return Dismissible(
+                              background: slideRightBackground(),
+                              secondaryBackground: slideLeftBackground(),
+                              key: UniqueKey(),
+                              onDismissed: (DismissDirection direction) {
+                                if (direction == DismissDirection.endToStart) {
+                                  _delete(attraction, index);
+                                  // setState(() {
+                                  // allAttractionsList.removeAt(index);
+                                  // allAttractionsList.remove(attraction);
+                                  // foundAttractionsList = allAttractionsList;
+                                  // });
+                                } else {
+                                  _openForm(
+                                    currentAttraction: attraction,
+                                    currentIndex: index,
+                                  );
+                                }
+                              },
+                              child: InkWell(
+                                onTap: () => showBottomFilter(attraction),
+                                child: CustomListTile(
+                                  title: attraction.title,
+                                  date: attraction.dateFormatted,
+                                  subtitle: attraction.description,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -285,7 +284,7 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                     key.currentState!.validatedData()) {
                   Navigator.of(context).pop();
                   final newAttraction = key.currentState!.newAttraction;
-                  _dao.salvar(newAttraction).then((success) {
+                  _dao.save(newAttraction).then((success) {
                     if (success) {
                       _updateList();
                     }
@@ -314,11 +313,11 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
     setState(() {
       _isLoading = false;
     });
-    final attractions = await _dao.listar(
-      filter: '',
-      fieldOrder: AttractionModel.FIELD_ID,
-      isDescOrder: false,
-    );
+    final attractions = await _dao.getAll(
+        // filter: '',
+        // fieldOrder: AttractionModel.FIELD_ID,
+        // isDescOrder: false,
+        );
     setState(() {
       allAttractionsList.clear();
       foundAttractionsList.clear();
@@ -380,7 +379,7 @@ class _ListAttractionsPageState extends State<ListAttractionsPage> {
                 if (attraction.id == null) {
                   return;
                 }
-                _dao.remover(attraction.id!).then((success) {
+                _dao.remove(attraction.id!).then((success) {
                   if (success) _updateList();
                 });
 

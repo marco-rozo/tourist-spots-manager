@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 class AttractionDao {
   final dbProvider = DatabaseProvider.instance;
 
-  Future<bool> salvar(AttractionModel attraction) async {
+  Future<bool> save(AttractionModel attraction) async {
     final database = await dbProvider.database;
     final values = attraction.toMap();
     if (attraction.id == null) {
@@ -22,7 +22,7 @@ class AttractionDao {
     }
   }
 
-  Future<bool> remover(int id) async {
+  Future<bool> remove(int id) async {
     final database = await dbProvider.database;
     final recordsUpdated = await database.delete(
       AttractionModel.TABLE_NAME,
@@ -32,20 +32,23 @@ class AttractionDao {
     return recordsUpdated > 0;
   }
 
-  Future<List<AttractionModel>> listar(
-      {String filter = '',
-      String fieldOrder = AttractionModel.FIELD_ID,
-      bool isDescOrder = false}) async {
-    String? where;
-    if (filter.isNotEmpty) {
-      where =
-          "UPPER(${AttractionModel.FIELD_DESCRIPTION}) LIKE '${filter.toUpperCase()}%'";
-    }
-    var orderBy = fieldOrder;
+  Future<List<AttractionModel>> getAll(
+      // {String filter = '',
+      // String fieldOrder = AttractionModel.FIELD_ID,
+      // bool isDescOrder = false}
+      ) async {
+    // String? where;
+    // if (filter.isNotEmpty) {
+    //   where =
+    //       "UPPER(${AttractionModel.FIELD_DESCRIPTION}) LIKE '${filter.toUpperCase()}%'";
+    // }
+    // var orderBy = fieldOrder;
 
-    if (isDescOrder) {
-      orderBy += ' DESC';
-    }
+    // if (isDescOrder) {
+    //   orderBy += ' DESC';
+    // }
+
+    //* OPTEI POR FAZER O FILTRO DE PESQUISA E A ORDENAÇÃO DIRETO NA PAGE, PELA LISTA.
     final database = await dbProvider.database;
     final records = await database.query(
       AttractionModel.TABLE_NAME,
@@ -56,8 +59,8 @@ class AttractionDao {
         AttractionModel.FIELD_DIFFERENTIAL,
         AttractionModel.FIELD_DATE
       ],
-      where: where,
-      orderBy: orderBy,
+      // where: where,
+      // orderBy: orderBy,
     );
     return records.map((m) => AttractionModel.fromMap(m)).toList();
   }
